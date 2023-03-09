@@ -1,3 +1,21 @@
-<h1>Welcome to your library project</h1>
-<p>Create your package using @sveltejs/package and preview/showcase your work with SvelteKit</p>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script lang="ts">
+	import AudioContext from '$lib/AudioContext.svelte';
+	import Gain from '$lib/Gain.svelte';
+	import Oscillator from '$lib/Oscillator.svelte';
+	import BiquadFilter from '$lib/BiquadFilter.svelte';
+</script>
+
+<AudioContext>
+	<Gain>
+		<Gain>
+			<BiquadFilter>
+				<Oscillator />
+			</BiquadFilter>
+		</Gain>
+		<Gain>
+			<BiquadFilter>
+				<Oscillator />
+			</BiquadFilter>
+		</Gain>
+	</Gain>
+</AudioContext>
