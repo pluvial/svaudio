@@ -5,7 +5,7 @@
 	import BiquadFilter from '$lib/BiquadFilter.svelte';
 </script>
 
-<AudioContext>
+<AudioContext on:error={({ detail: error }) => console.error(error)}>
 	<Gain>
 		<Gain>
 			<BiquadFilter>

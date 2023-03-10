@@ -1,53 +1,60 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { setCtx } from './context';
+	import { createEventDispatcher, onMount } from 'svelte';
+	import { writable } from 'svelte/store';
+	import { type Ctx, setCtx } from './context';
 
-	let ctx: AudioContext;
+	const dispatch = createEventDispatcher();
 
-	let resolveResumed: () => void;
-	let rejectResumed: (error: unknown) => void;
-	const resumedPromise = new Promise<void>((resolve, reject) => {
-		resolveResumed = resolve;
-		rejectResumed = reject;
-	});
-	let resumed = false;
+	const state = writable<AudioContextState>('suspended');
+
+	let audioCtx: AudioContext;
+
+	let ctx: Ctx = {
+		audioCtx: undefined as unknown as AudioContext,
+		state: { subscribe: state.subscribe }
+	};
+
+	setCtx(ctx);
+
+	function statechange() {
+		state.set(audioCtx.state);
+	}
 
 	let analyser: AnalyserNode;
 
 	async function init() {
-		ctx = new AudioContext();
+		audioCtx = new AudioContext();
+		ctx.audioCtx = audioCtx;
 
 		try {
-			await ctx.resume();
-			resolveResumed();
-			resumed = true;
+			await audioCtx.resume();
 		} catch (error) {
-			rejectResumed(error);
-			resumed = false;
+			dispatch('error', error);
 			return;
 		}
 
-		analyser = new AnalyserNode(ctx);
+		audioCtx.addEventListener('statechange', statechange);
 
-		analyser.connect(ctx.destination);
+		analyser = new AnalyserNode(audioCtx);
+
+		analyser.connect(audioCtx.destination);
 	}
-
-	setCtx({ get: () => ctx, resumed: () => resumed });
 
 	onMount(() => {
 		document.addEventListener('click', init, { once: true });
 
 		return () => {
 			document.removeEventListener('click', init);
+			audioCtx?.removeEventListener('statechange', statechange);
 		};
 	});
 </script>
 
-{#await resumedPromise}
+{#if $state === 'running'}
+	<p>running</p>
+	<slot {audioCtx} />
+{:else if $state === 'suspended'}
 	<p>click</p>
-{:then}
-	<p>resumed</p>
-	<slot {ctx} />
-{:catch error}
-	<p>error: {error}</p>
-{/await}
+{:else if $state === 'closed'}
+	<p>closed</p>
+{/if}
