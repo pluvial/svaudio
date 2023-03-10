@@ -33,42 +33,72 @@
 		</Gain>
 	</Gain>
 
-	<label>
-		Volume
-		<input type="range" min={0} max={1} step={0.01} bind:value={volume} />
-	</label>
+	<main>
+		<section>
+			<label>
+				Volume
+				<input type="range" min={0} max={1} step={0.01} bind:value={volume} />
+			</label>
+		</section>
 
-	<label>
-		Oscillator 1 active
-		<input type="checkbox" bind:checked={active[0]} />
-	</label>
+		<section>
+			<label>
+				Oscillator 1 active
+				<input type="checkbox" bind:checked={active[0]} />
+			</label>
 
-	<label>
-		Oscillator 2 active
-		<input type="checkbox" bind:checked={active[1]} />
-	</label>
+			<label>
+				Oscillator 2 active
+				<input type="checkbox" bind:checked={active[1]} />
+			</label>
 
-	<label>
-		Detune
-		<input type="range" min={-50} max={50} step={0.1} bind:value={detune} />
-	</label>
+			<label>
+				Detune
+				<input type="range" min={-50} max={50} step={0.1} bind:value={detune} />
+			</label>
 
-	<label>
-		Frequency
-		<input type="range" min={30} max={1000} step={0.1} bind:value={frequency} />
-	</label>
+			<label>
+				Frequency
+				<input type="range" min={20} max={1000} step={0.1} bind:value={frequency} />
+			</label>
+		</section>
 
-	<label>
-		Filter frequency
-		<input type="range" min={30} max={10000} step={0.1} bind:value={filterFrequency} />
-	</label>
+		<section>
+			<label>
+				Filter frequency
+				<input type="range" min={30} max={10000} step={0.1} bind:value={filterFrequency} />
+			</label>
 
-	<label>
-		Filter resonance
-		<input type="range" min={0} max={50} step={0.1} bind:value={filterResonance} />
-	</label>
+			<label>
+				Filter resonance
+				<input type="range" min={0} max={50} step={0.1} bind:value={filterResonance} />
+			</label>
+		</section>
 
-	<button type="button" on:click={trigger}>Trigger attack + release</button>
+		<section>
+			<button type="button" on:click={trigger}>Trigger attack + release</button>
+		</section>
+	</main>
 </AudioContext>
 
 <svelte:window on:keydown={(event) => !event.ctrlKey && !event.metaKey && trigger()} />
+
+<style>
+	main {
+		display: flex;
+		flex-direction: column;
+		gap: 1em;
+	}
+
+	section {
+		display: flex;
+		align-items: center;
+		gap: 0.5em;
+	}
+
+	label {
+		display: flex;
+		align-items: center;
+		gap: 0.5em;
+	}
+</style>
