@@ -8,16 +8,29 @@
 
 	let filterFrequency = 2000;
 	let filterResonance = 1;
+	let filterType: BiquadFilterType = 'lowpass';
+
+	const filterTypes: BiquadFilterType[] = [
+		'allpass',
+		'bandpass',
+		'highpass',
+		'highshelf',
+		'lowpass',
+		'lowshelf',
+		'notch',
+		'peaking'
+	];
 
 	let frequency = 220;
 
-	let active = [true, true];
-	let waveforms: OscillatorType[] = ['sawtooth', 'sawtooth'];
-	let volumes = [1, 1];
-	let frequencies = [frequency, frequency];
-	let follow = [true, true];
+	const oscillatorTypes: OscillatorType[] = ['sine', 'triangle', 'square', 'sawtooth'];
 
-	let detune = 1;
+	let active = [true, true, true];
+	let waveforms: OscillatorType[] = ['sawtooth', 'sawtooth', 'sawtooth'];
+	let volumes = [1, 1, 1];
+	let detunes = [0, 20, 30];
+	let frequencies = [frequency, frequency, frequency];
+	let follow = [true, true, true];
 
 	let triggerAttack: () => void;
 	let triggerRelease: () => void;
@@ -50,26 +63,33 @@
 
 	<Gain gain={volume}>
 		<Gain gain={0} bind:triggerAttack bind:triggerRelease bind:triggerAttackRelease>
-			<BiquadFilter frequency={filterFrequency} Q={filterResonance}>
-				{#if active[0]}
-					<Gain gain={volumes[0]}>
-						<Oscillator frequency={follow[0] ? frequency : frequencies[0]} type={waveforms[0]} />
-					</Gain>
-				{/if}
-				{#if active[1]}
-					<Gain gain={volumes[1]}>
-						<Oscillator
-							{detune}
-							frequency={follow[1] ? frequency : frequencies[1]}
-							type={waveforms[1]}
-						/>
-					</Gain>
-				{/if}
+			<BiquadFilter frequency={filterFrequency} Q={filterResonance} type={filterType}>
+				{#each { length: 3 } as _, o}
+					{#if active[o]}
+						<Gain gain={volumes[o]}>
+							<Oscillator
+								frequency={follow[o] ? frequency : frequencies[o]}
+								type={waveforms[o]}
+								detune={o === 0 ? undefined : detunes[o]}
+							/>
+						</Gain>
+					{/if}
+				{/each}
 			</BiquadFilter>
 		</Gain>
 	</Gain>
 
 	<main>
+		<section>
+			<h2>Triggers</h2>
+
+			<button type="button" on:click={() => triggerAttack()}>Attack</button>
+
+			<button type="button" on:click={() => triggerRelease()}>Release</button>
+
+			<button type="button" on:click={() => triggerAttackRelease()}>Attack + Release</button>
+		</section>
+
 		<section>
 			<h2>Master</h2>
 
@@ -81,6 +101,13 @@
 
 		<section>
 			<h2>Filter</h2>
+
+			<label>
+				Type
+				<select bind:value={filterType}
+					>{#each filterTypes as type}<option>{type}</option>{/each}
+				</select>
+			</label>
 
 			<label>
 				Frequency
@@ -101,121 +128,62 @@
 				<input type="range" min={20} max={2000} step={0.1} bind:value={frequency} />
 			</label>
 
-			<h3>Oscillator 1</h3>
+			{#each { length: 3 } as _, o}
+				<h3>Oscillator {o + 1}</h3>
 
-			<label>
-				Active
-				<input type="checkbox" bind:checked={active[0]} />
-			</label>
+				<label>
+					Active
+					<input type="checkbox" bind:checked={active[o]} />
+				</label>
 
-			<label>
-				Volume
-				<input
-					type="range"
-					min={0}
-					max={1}
-					step={0.01}
-					bind:value={volumes[0]}
-					disabled={!active[0]}
-				/>
-			</label>
+				<label>
+					Volume
+					<input
+						type="range"
+						min={0}
+						max={1}
+						step={0.01}
+						bind:value={volumes[o]}
+						disabled={!active[o]}
+					/>
+				</label>
 
-			<label>
-				Waveform
-				<select bind:value={waveforms[0]} disabled={!active[0]}
-					><option>sine</option>
-					<option>triangle</option>
-					<option>square</option>
-					<option>sawtooth</option>
-				</select>
-			</label>
+				<label>
+					Waveform
+					<select bind:value={waveforms[o]} disabled={!active[o]}
+						>{#each oscillatorTypes as type}<option>{type}</option>{/each}
+					</select>
+				</label>
 
-			<label>
-				Follow
-				<input type="checkbox" bind:checked={follow[0]} disabled={!active[0]} />
-			</label>
+				<label>
+					Follow
+					<input type="checkbox" bind:checked={follow[o]} disabled={!active[o]} />
+				</label>
 
-			<label>
-				Frequency
-				<input
-					type="range"
-					min={20}
-					max={2000}
-					step={0.1}
-					bind:value={frequencies[0]}
-					disabled={!active[0] || follow[0]}
-				/>
-			</label>
-		</section>
+				<label>
+					Frequency
+					<input
+						type="range"
+						min={20}
+						max={2000}
+						step={0.1}
+						bind:value={frequencies[o]}
+						disabled={!active[o] || follow[o]}
+					/>
+				</label>
 
-		<section>
-			<h3>Oscillator 2</h3>
-
-			<label>
-				Active
-				<input type="checkbox" bind:checked={active[1]} />
-			</label>
-
-			<label>
-				Volume
-				<input
-					type="range"
-					min={0}
-					max={1}
-					step={0.01}
-					bind:value={volumes[1]}
-					disabled={!active[1]}
-				/>
-			</label>
-
-			<label>
-				Waveform
-				<select bind:value={waveforms[1]} disabled={!active[1]}
-					><option>sine</option>
-					<option>triangle</option>
-					<option>square</option>
-					<option>sawtooth</option>
-				</select>
-			</label>
-
-			<label>
-				Follow
-				<input type="checkbox" bind:checked={follow[1]} disabled={!active[1]} />
-			</label>
-
-			<label>
-				Frequency
-				<input
-					type="range"
-					min={20}
-					max={2000}
-					step={0.1}
-					bind:value={frequencies[1]}
-					disabled={!active[1] || follow[1]}
-				/>
-			</label>
-
-			<label>
-				Detune
-				<input
-					type="range"
-					min={-50}
-					max={50}
-					step={0.1}
-					bind:value={detune}
-					disabled={!active[1]}
-				/>
-			</label>
-		</section>
-
-		<section>
-			<h2>Triggers</h2>
-
-			<button type="button" on:click={() => triggerAttack()}>Attack</button>
-
-			<button type="button" on:click={() => triggerRelease()}>Release</button>
-
-			<button type="button" on:click={() => triggerAttackRelease()}>Attack + Release</button>
+				<label>
+					Detune
+					<input
+						type="range"
+						min={-50}
+						max={50}
+						step={0.1}
+						bind:value={detunes[o]}
+						disabled={!active[o]}
+					/>
+				</label>
+			{/each}
 		</section>
 	</main>
 </AudioContext>
