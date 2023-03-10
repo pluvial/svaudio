@@ -2,12 +2,18 @@
 	import { onDestroy } from 'svelte';
 	import { getCtx, setCtxOutput } from './context';
 
-	type $$Props = GainOptions & {
-		attack?: number;
-		hold?: number;
-		release?: number;
+	interface TriggerFns {
+		triggerAttack?: (when?: number) => void;
+		triggerRelease?: (when?: number) => void;
 		triggerAttackRelease?: (when?: number) => void;
-	};
+	}
+
+	type $$Props = GainOptions &
+		TriggerFns & {
+			attack?: number;
+			hold?: number;
+			release?: number;
+		};
 
 	export let gain: $$Props['gain'] = undefined;
 
@@ -34,13 +40,22 @@
 
 	setCtxOutput(node);
 
-	export let triggerAttackRelease = (time = audioCtx.currentTime) => {
+	export let triggerAttack = (time = audioCtx.currentTime) => {
 		const param = node.gain;
 		param.cancelScheduledValues(time);
 		param.setValueAtTime(0, time);
 		param.linearRampToValueAtTime(1, time + attack);
-		param.setValueAtTime(1, time + attack + hold);
-		param.linearRampToValueAtTime(0, time + attack + hold + release);
+	};
+
+	export let triggerRelease = (time = audioCtx.currentTime) => {
+		const param = node.gain;
+		param.cancelScheduledValues(time + release);
+		param.linearRampToValueAtTime(0, time + release);
+	};
+
+	export let triggerAttackRelease = (time = audioCtx.currentTime) => {
+		triggerAttack(time);
+		triggerRelease(time + attack + hold);
 	};
 
 	$: if (typeof gain === 'number' && gain !== options.gain) {
@@ -51,4 +66,4 @@
 	onDestroy(() => node.disconnect(output));
 </script>
 
-<slot {triggerAttackRelease} />
+<slot {triggerAttack} {triggerRelease} {triggerAttackRelease} />

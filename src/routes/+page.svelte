@@ -16,10 +16,27 @@
 	let filterFrequency = 2000;
 	let filterResonance = 1;
 
+	let triggerAttack: () => void;
+	let triggerRelease: () => void;
 	let triggerAttackRelease: () => void;
 
-	function trigger() {
-		triggerAttackRelease?.();
+	let pressedCodes = new Set<string>();
+
+	function keydown(event: KeyboardEvent) {
+		const { code, key, altKey, ctrlKey, metaKey, shiftKey } = event;
+		if (altKey || ctrlKey || metaKey || shiftKey) return;
+		if (!pressedCodes.has(code)) {
+			pressedCodes.add(code);
+			triggerAttack();
+		}
+	}
+
+	function keyup(event: KeyboardEvent) {
+		const { code, key, altKey, ctrlKey, metaKey, shiftKey } = event;
+		if (pressedCodes.has(code)) {
+			pressedCodes.delete(code);
+			triggerRelease();
+		}
 	}
 </script>
 
@@ -29,7 +46,7 @@
 	<p slot="closed">audio context closed</p>
 
 	<Gain gain={volume}>
-		<Gain gain={0} bind:triggerAttackRelease>
+		<Gain gain={0} bind:triggerAttack bind:triggerRelease bind:triggerAttackRelease>
 			<BiquadFilter frequency={filterFrequency} Q={filterResonance}>
 				{#if active[0]}
 					<Gain gain={volumes[0]}>
@@ -132,12 +149,16 @@
 		<section>
 			<h2>Triggers</h2>
 
-			<button type="button" on:click={trigger}>Attack + Release</button>
+			<button type="button" on:click={() => triggerAttack()}>Attack</button>
+
+			<button type="button" on:click={() => triggerRelease()}>Release</button>
+
+			<button type="button" on:click={() => triggerAttackRelease()}>Attack + Release</button>
 		</section>
 	</main>
 </AudioContext>
 
-<svelte:window on:keydown={(event) => !event.ctrlKey && !event.metaKey && trigger()} />
+<svelte:window on:keydown={keydown} on:keyup={keyup} />
 
 <style>
 	main {
