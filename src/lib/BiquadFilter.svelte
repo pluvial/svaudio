@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getCtx } from './context';
+	import { getCtx, setCtxOutput } from './context';
 
 	type $$Props = BiquadFilterOptions & {};
 
@@ -13,7 +13,7 @@
 	export let channelCountMode: $$Props['channelCountMode'] = undefined;
 	export let channelInterpretation: $$Props['channelInterpretation'] = undefined;
 
-	const { audioCtx } = getCtx();
+	const { audioCtx, output } = getCtx();
 
 	const node = new BiquadFilterNode(audioCtx, {
 		Q,
@@ -25,6 +25,10 @@
 		channelCountMode,
 		channelInterpretation
 	});
+
+	node.connect(output);
+
+	setCtxOutput(node);
 </script>
 
 <slot />

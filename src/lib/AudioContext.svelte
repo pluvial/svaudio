@@ -9,8 +9,10 @@
 
 	let audioCtx: AudioContext;
 
+	// TODO: revisit forced type assertions
 	let ctx: Ctx = {
 		audioCtx: undefined as unknown as AudioContext,
+		output: undefined as unknown as AudioNode,
 		state: { subscribe: state.subscribe }
 	};
 
@@ -25,6 +27,7 @@
 	async function init() {
 		audioCtx = new AudioContext();
 		ctx.audioCtx = audioCtx;
+		ctx.output = audioCtx.destination;
 
 		try {
 			await audioCtx.resume();

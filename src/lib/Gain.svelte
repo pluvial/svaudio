@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getCtx } from './context';
+	import { getCtx, setCtxOutput } from './context';
 
 	type $$Props = GainOptions & { attack?: number; hold?: number; release?: number };
 
@@ -9,11 +9,11 @@
 	export let channelCountMode: $$Props['channelCountMode'] = undefined;
 	export let channelInterpretation: $$Props['channelInterpretation'] = undefined;
 
-	export let attack: number = 0.1;
-	export let hold: number = 0.1;
+	export let attack: number = 0.01;
+	export let hold: number = 0.2;
 	export let release: number = 0.1;
 
-	const { audioCtx } = getCtx();
+	const { audioCtx, output } = getCtx();
 
 	const node = new GainNode(audioCtx, {
 		gain,
@@ -21,6 +21,10 @@
 		channelCountMode,
 		channelInterpretation
 	});
+
+	node.connect(output);
+
+	setCtxOutput(node);
 
 	export const triggerAttackRelease = (time = audioCtx.currentTime) => {
 		const param = node.gain;

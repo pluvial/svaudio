@@ -12,7 +12,7 @@
 	export let channelCountMode: $$Props['channelCountMode'] = undefined;
 	export let channelInterpretation: $$Props['channelInterpretation'] = undefined;
 
-	const { audioCtx } = getCtx();
+	const { audioCtx, output } = getCtx();
 
 	const node = new OscillatorNode(audioCtx, {
 		detune,
@@ -23,6 +23,10 @@
 		channelCountMode,
 		channelInterpretation
 	});
+
+	node.connect(output);
+
+	node.start();
 </script>
 
 <slot />

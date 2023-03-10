@@ -5,23 +5,25 @@
 	import BiquadFilter from '$lib/BiquadFilter.svelte';
 
 	let triggerAttackRelease: () => void;
+	let triggerAttackRelease2: () => void;
 
 	function click() {
 		triggerAttackRelease();
+		triggerAttackRelease2();
 	}
 </script>
 
 <AudioContext on:error={({ detail: error }) => console.error(error)}>
 	<button type="button" on:click={click}>Trigger attack + release</button>
-	<Gain gain={1}>
-		<Gain bind:triggerAttackRelease>
+	<Gain>
+		<Gain gain={0} bind:triggerAttackRelease>
 			<BiquadFilter>
 				<Oscillator />
 			</BiquadFilter>
 		</Gain>
-		<Gain>
+		<Gain gain={0} bind:triggerAttackRelease={triggerAttackRelease2}>
 			<BiquadFilter>
-				<Oscillator />
+				<Oscillator type="sawtooth" frequency={220} />
 			</BiquadFilter>
 		</Gain>
 	</Gain>
