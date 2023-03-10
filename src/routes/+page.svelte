@@ -8,32 +8,28 @@
 
 	let detune = 1;
 	let frequency = 330;
+	let filterFrequency = 2000;
+	let filterResonance = 1;
 
 	let triggerAttackRelease: () => void;
-	let triggerAttackRelease2: () => void;
 
 	function trigger() {
-		active[0] && triggerAttackRelease();
-		active[1] && triggerAttackRelease2();
+		triggerAttackRelease?.();
 	}
 </script>
 
 <AudioContext on:error={({ detail: error }) => console.error(error)}>
 	<Gain>
-		{#if active[0]}
-			<Gain gain={0} bind:triggerAttackRelease>
-				<BiquadFilter>
+		<Gain gain={0} bind:triggerAttackRelease>
+			<BiquadFilter frequency={filterFrequency} Q={filterResonance}>
+				{#if active[0]}
 					<Oscillator type="sawtooth" {frequency} />
-				</BiquadFilter>
-			</Gain>
-		{/if}
-		{#if active[1]}
-			<Gain gain={0} bind:triggerAttackRelease={triggerAttackRelease2}>
-				<BiquadFilter>
+				{/if}
+				{#if active[1]}
 					<Oscillator type="sawtooth" {detune} {frequency} />
-				</BiquadFilter>
-			</Gain>
-		{/if}
+				{/if}
+			</BiquadFilter>
+		</Gain>
 	</Gain>
 
 	<label>
@@ -54,6 +50,16 @@
 	<label>
 		Frequency
 		<input type="range" min={30} max={1000} step={1} bind:value={frequency} />
+	</label>
+
+	<label>
+		Filter frequency
+		<input type="range" min={30} max={10000} step={1} bind:value={filterFrequency} />
+	</label>
+
+	<label>
+		Filter resonance
+		<input type="range" min={0} max={50} step={1} bind:value={filterResonance} />
 	</label>
 
 	<button type="button" on:click={trigger}>Trigger attack + release</button>

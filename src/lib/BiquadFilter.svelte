@@ -15,7 +15,7 @@
 
 	const { audioCtx, output } = getCtx();
 
-	const node = new BiquadFilterNode(audioCtx, {
+	const options = {
 		Q,
 		detune,
 		frequency,
@@ -24,11 +24,23 @@
 		channelCount,
 		channelCountMode,
 		channelInterpretation
-	});
+	} satisfies BiquadFilterOptions;
+
+	const node = new BiquadFilterNode(audioCtx, options);
 
 	node.connect(output);
 
 	setCtxOutput(node);
+
+	$: if (typeof frequency === 'number' && frequency !== options.frequency) {
+		node.frequency.setValueAtTime(frequency, 0);
+		options.frequency = frequency;
+	}
+
+	$: if (typeof Q === 'number' && Q !== options.Q) {
+		node.Q.setValueAtTime(Q, 0);
+		options.Q = Q;
+	}
 </script>
 
 <slot />
