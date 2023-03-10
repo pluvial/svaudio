@@ -4,11 +4,15 @@
 	import Oscillator from '$lib/Oscillator.svelte';
 	import BiquadFilter from '$lib/BiquadFilter.svelte';
 
-	let active = [true, true];
-
 	let volume = 1;
-	let detune = 1;
+
+	let active = [true, true];
+	let waveforms: OscillatorType[] = ['sawtooth', 'sawtooth'];
+	let volumes = [1, 1];
+
 	let frequency = 330;
+	let detune = 1;
+
 	let filterFrequency = 2000;
 	let filterResonance = 1;
 
@@ -28,10 +32,14 @@
 		<Gain gain={0} bind:triggerAttackRelease>
 			<BiquadFilter frequency={filterFrequency} Q={filterResonance}>
 				{#if active[0]}
-					<Oscillator type="sawtooth" {frequency} />
+					<Gain gain={volumes[0]}>
+						<Oscillator {frequency} type={waveforms[0]} />
+					</Gain>
 				{/if}
 				{#if active[1]}
-					<Oscillator type="sawtooth" {detune} {frequency} />
+					<Gain gain={volumes[1]}>
+						<Oscillator {detune} {frequency} type={waveforms[1]} />
+					</Gain>
 				{/if}
 			</BiquadFilter>
 		</Gain>
@@ -39,6 +47,8 @@
 
 	<main>
 		<section>
+			<h2>Master</h2>
+
 			<label>
 				Volume
 				<input type="range" min={0} max={1} step={0.01} bind:value={volume} />
@@ -46,19 +56,33 @@
 		</section>
 
 		<section>
+			<h2>Oscillator 1</h2>
+
 			<label>
-				Oscillator 1 active
+				Active
 				<input type="checkbox" bind:checked={active[0]} />
 			</label>
 
 			<label>
-				Oscillator 2 active
-				<input type="checkbox" bind:checked={active[1]} />
+				Waveform
+				<select bind:value={waveforms[0]} disabled={!active[0]}
+					><option>sine</option>
+					<option>triangle</option>
+					<option>square</option>
+					<option>sawtooth</option>
+				</select>
 			</label>
 
 			<label>
-				Detune
-				<input type="range" min={-50} max={50} step={0.1} bind:value={detune} />
+				Volume
+				<input
+					type="range"
+					min={0}
+					max={1}
+					step={0.01}
+					bind:value={volumes[0]}
+					disabled={!active[0]}
+				/>
 			</label>
 
 			<label>
@@ -68,19 +92,47 @@
 		</section>
 
 		<section>
+			<h2>Oscillator 2</h2>
+
 			<label>
-				Filter frequency
+				Active
+				<input type="checkbox" bind:checked={active[1]} />
+			</label>
+
+			<label>
+				Waveform
+				<select bind:value={waveforms[1]} disabled={!active[1]}
+					><option>sine</option>
+					<option>triangle</option>
+					<option>square</option>
+					<option>sawtooth</option>
+				</select>
+			</label>
+
+			<label>
+				Detune
+				<input type="range" min={-50} max={50} step={0.1} bind:value={detune} />
+			</label>
+		</section>
+
+		<section>
+			<h2>Filter</h2>
+
+			<label>
+				Frequency
 				<input type="range" min={30} max={10000} step={0.1} bind:value={filterFrequency} />
 			</label>
 
 			<label>
-				Filter resonance
+				Resonance
 				<input type="range" min={0} max={50} step={0.1} bind:value={filterResonance} />
 			</label>
 		</section>
 
 		<section>
-			<button type="button" on:click={trigger}>Trigger attack + release</button>
+			<h2>Triggers</h2>
+
+			<button type="button" on:click={trigger}>Attack + Release</button>
 		</section>
 	</main>
 </AudioContext>
@@ -94,15 +146,16 @@
 		gap: 1em;
 	}
 
-	section {
-		display: flex;
-		align-items: center;
-		gap: 0.5em;
+	h2 {
+		margin-top: 1em;
+		margin-bottom: 0.2em;
 	}
 
 	label {
+		max-width: 20em;
 		display: flex;
 		align-items: center;
+		justify-content: space-between;
 		gap: 0.5em;
 	}
 </style>

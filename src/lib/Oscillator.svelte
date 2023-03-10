@@ -41,6 +41,11 @@
 		options.frequency = frequency;
 	}
 
+	$: if (typeof type === 'string' && type !== options.type) {
+		node.type = type;
+		options.type = type;
+	}
+
 	onDestroy(() => node.disconnect(output));
 </script>
 
