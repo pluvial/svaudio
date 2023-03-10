@@ -8,12 +8,12 @@ export interface Ctx {
 
 export const key = Symbol();
 
-export const getCtx = () => getContext<Ctx>(key);
+export const getCtx = () => validate(getContext<Ctx>(key));
 
 export const setCtx = (c: Ctx) => setContext<Ctx>(key, c);
 
-export function validate() {
-	const ctx = getCtx();
+function validate(ctx: Partial<Ctx>): Ctx {
 	if (!ctx.audioCtx) throw new Error('AudioContext not created');
-	if (get(ctx.state) !== 'running') throw new Error('AudioContext not running');
+	if (!ctx.state || get(ctx.state) !== 'running') throw new Error('AudioContext not running');
+	return ctx as Ctx;
 }

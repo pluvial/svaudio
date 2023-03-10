@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { getCtx, validate } from './context';
+	import { getCtx } from './context';
 
-	validate();
-
-	const ctx = getCtx();
+	const { audioCtx } = getCtx();
 </script>
 
 <slot />
