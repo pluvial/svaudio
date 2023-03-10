@@ -14,7 +14,7 @@
 
 	const { audioCtx, output } = getCtx();
 
-	const node = new OscillatorNode(audioCtx, {
+	const options = {
 		detune,
 		periodicWave,
 		frequency,
@@ -22,11 +22,23 @@
 		channelCount,
 		channelCountMode,
 		channelInterpretation
-	});
+	} satisfies OscillatorOptions;
+
+	const node = new OscillatorNode(audioCtx, options);
 
 	node.connect(output);
 
 	node.start();
+
+	$: if (typeof detune === 'number' && detune !== options.detune) {
+		node.detune.setValueAtTime(detune, 0);
+		options.detune = detune;
+	}
+
+	$: if (typeof frequency === 'number' && frequency !== options.frequency) {
+		node.frequency.setValueAtTime(frequency, 0);
+		options.frequency = frequency;
+	}
 </script>
 
 <slot />

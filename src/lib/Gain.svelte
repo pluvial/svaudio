@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { getCtx, setCtxOutput } from './context';
 
-	type $$Props = GainOptions & { attack?: number; hold?: number; release?: number };
+	type $$Props = GainOptions & {
+		attack?: number;
+		hold?: number;
+		release?: number;
+		triggerAttackRelease?: (when?: number) => void;
+	};
 
 	export let gain: $$Props['gain'] = undefined;
 
@@ -26,7 +31,7 @@
 
 	setCtxOutput(node);
 
-	export const triggerAttackRelease = (time = audioCtx.currentTime) => {
+	export let triggerAttackRelease = (time = audioCtx.currentTime) => {
 		const param = node.gain;
 		param.cancelScheduledValues(time);
 		param.setValueAtTime(0, time);
@@ -36,4 +41,4 @@
 	};
 </script>
 
-<slot />
+<slot {triggerAttackRelease} />
