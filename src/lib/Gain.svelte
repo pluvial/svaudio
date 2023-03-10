@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { getCtx } from './context';
+	import { getCtx, validate } from './context';
+
+	validate();
 
 	const ctx = getCtx();
 </script>

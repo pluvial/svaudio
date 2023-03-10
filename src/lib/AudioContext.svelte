@@ -4,31 +4,50 @@
 
 	let ctx: AudioContext;
 
-	setCtx({ get: () => ctx });
+	let resolveResumed: () => void;
+	let rejectResumed: (error: unknown) => void;
+	const resumedPromise = new Promise<void>((resolve, reject) => {
+		resolveResumed = resolve;
+		rejectResumed = reject;
+	});
+	let resumed = false;
 
 	let analyser: AnalyserNode;
 
 	async function init() {
-		ctx ??= new AudioContext();
-		if (ctx.state !== 'running') await ctx.resume();
+		ctx = new AudioContext();
+
+		try {
+			await ctx.resume();
+			resolveResumed();
+			resumed = true;
+		} catch (error) {
+			rejectResumed(error);
+			resumed = false;
+			return;
+		}
 
 		analyser = new AnalyserNode(ctx);
 
 		analyser.connect(ctx.destination);
 	}
 
-	onMount(() => {
-		async function click() {
-			await init();
-			document.removeEventListener('click', click);
-		}
+	setCtx({ get: () => ctx, resumed: () => resumed });
 
-		document.addEventListener('click', click);
+	onMount(() => {
+		document.addEventListener('click', init, { once: true });
 
 		return () => {
-			document.removeEventListener('click', click);
+			document.removeEventListener('click', init);
 		};
 	});
 </script>
 
-<slot {ctx} />
+{#await resumedPromise}
+	<p>click</p>
+{:then}
+	<p>resumed</p>
+	<slot {ctx} />
+{:catch error}
+	<p>error: {error}</p>
+{/await}
