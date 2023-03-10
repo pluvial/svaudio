@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { getCtx, setCtxOutput } from './context';
 
 	type $$Props = BiquadFilterOptions & {};
@@ -41,6 +42,8 @@
 		node.Q.setValueAtTime(Q, 0);
 		options.Q = Q;
 	}
+
+	onDestroy(() => node.disconnect(output));
 </script>
 
 <slot />

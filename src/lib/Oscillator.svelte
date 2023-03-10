@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { getCtx } from './context';
 
 	type $$Props = OscillatorOptions & {};
@@ -39,6 +40,8 @@
 		node.frequency.setValueAtTime(frequency, 0);
 		options.frequency = frequency;
 	}
+
+	onDestroy(() => node.disconnect(output));
 </script>
 
 <slot />

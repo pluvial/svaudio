@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { getCtx, setCtxOutput } from './context';
 
 	type $$Props = GainOptions & {
@@ -20,12 +21,14 @@
 
 	const { audioCtx, output } = getCtx();
 
-	const node = new GainNode(audioCtx, {
+	const options = {
 		gain,
 		channelCount,
 		channelCountMode,
 		channelInterpretation
-	});
+	} satisfies GainOptions;
+
+	const node = new GainNode(audioCtx, options);
 
 	node.connect(output);
 
@@ -39,6 +42,13 @@
 		param.setValueAtTime(1, time + attack + hold);
 		param.linearRampToValueAtTime(0, time + attack + hold + release);
 	};
+
+	$: if (typeof gain === 'number' && gain !== options.gain) {
+		node.gain.setValueAtTime(gain, 0);
+		options.gain = gain;
+	}
+
+	onDestroy(() => node.disconnect(output));
 </script>
 
 <slot {triggerAttackRelease} />
