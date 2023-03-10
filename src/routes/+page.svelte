@@ -43,7 +43,7 @@
 		if (altKey || ctrlKey || metaKey || shiftKey) return;
 		if (!pressedCodes.has(code)) {
 			pressedCodes.add(code);
-			triggerAttack();
+			triggerAttack?.();
 		}
 	}
 
@@ -51,13 +51,13 @@
 		const { code, key, altKey, ctrlKey, metaKey, shiftKey } = event;
 		if (pressedCodes.has(code)) {
 			pressedCodes.delete(code);
-			triggerRelease();
+			triggerRelease?.();
 		}
 	}
 </script>
 
 <AudioContext on:error={({ detail: error }) => console.error(error)}>
-	<p slot="suspended">click to activate audio context</p>
+	<p slot="suspended">interact to activate audio context</p>
 
 	<p slot="closed">audio context closed</p>
 
@@ -78,115 +78,115 @@
 			</BiquadFilter>
 		</Gain>
 	</Gain>
+</AudioContext>
 
-	<main>
-		<section>
-			<h2>Triggers</h2>
+<main>
+	<section>
+		<h2>Triggers</h2>
 
-			<button type="button" on:click={() => triggerAttack()}>Attack</button>
+		<button type="button" on:click={() => triggerAttack()}>Attack</button>
 
-			<button type="button" on:click={() => triggerRelease()}>Release</button>
+		<button type="button" on:click={() => triggerRelease()}>Release</button>
 
-			<button type="button" on:click={() => triggerAttackRelease()}>Attack + Release</button>
-		</section>
+		<button type="button" on:click={() => triggerAttackRelease()}>Attack + Release</button>
+	</section>
 
-		<section>
-			<h2>Master</h2>
+	<section>
+		<h2>Master</h2>
+
+		<label>
+			Volume
+			<input type="range" min={0} max={1} step={0.01} bind:value={volume} />
+		</label>
+	</section>
+
+	<section>
+		<h2>Filter</h2>
+
+		<label>
+			Type
+			<select bind:value={filterType}
+				>{#each filterTypes as type}<option>{type}</option>{/each}
+			</select>
+		</label>
+
+		<label>
+			Frequency
+			<input type="range" min={30} max={10000} step={0.1} bind:value={filterFrequency} />
+		</label>
+
+		<label>
+			Resonance
+			<input type="range" min={0} max={50} step={0.1} bind:value={filterResonance} />
+		</label>
+	</section>
+
+	<section>
+		<h2>Oscillators</h2>
+
+		<label>
+			Frequency
+			<input type="range" min={20} max={2000} step={0.1} bind:value={frequency} />
+		</label>
+
+		{#each { length: 3 } as _, o}
+			<h3>Oscillator {o + 1}</h3>
+
+			<label>
+				Active
+				<input type="checkbox" bind:checked={active[o]} />
+			</label>
 
 			<label>
 				Volume
-				<input type="range" min={0} max={1} step={0.01} bind:value={volume} />
+				<input
+					type="range"
+					min={0}
+					max={1}
+					step={0.01}
+					bind:value={volumes[o]}
+					disabled={!active[o]}
+				/>
 			</label>
-		</section>
-
-		<section>
-			<h2>Filter</h2>
 
 			<label>
-				Type
-				<select bind:value={filterType}
-					>{#each filterTypes as type}<option>{type}</option>{/each}
+				Waveform
+				<select bind:value={waveforms[o]} disabled={!active[o]}
+					>{#each oscillatorTypes as type}<option>{type}</option>{/each}
 				</select>
 			</label>
 
 			<label>
-				Frequency
-				<input type="range" min={30} max={10000} step={0.1} bind:value={filterFrequency} />
+				Follow
+				<input type="checkbox" bind:checked={follow[o]} disabled={!active[o]} />
 			</label>
 
 			<label>
-				Resonance
-				<input type="range" min={0} max={50} step={0.1} bind:value={filterResonance} />
+				Frequency
+				<input
+					type="range"
+					min={20}
+					max={2000}
+					step={0.1}
+					bind:value={frequencies[o]}
+					disabled={!active[o] || follow[o]}
+				/>
 			</label>
-		</section>
-
-		<section>
-			<h2>Oscillators</h2>
 
 			<label>
-				Frequency
-				<input type="range" min={20} max={2000} step={0.1} bind:value={frequency} />
+				Detune
+				<input
+					type="range"
+					min={-50}
+					max={50}
+					step={0.1}
+					bind:value={detunes[o]}
+					disabled={!active[o]}
+				/>
 			</label>
-
-			{#each { length: 3 } as _, o}
-				<h3>Oscillator {o + 1}</h3>
-
-				<label>
-					Active
-					<input type="checkbox" bind:checked={active[o]} />
-				</label>
-
-				<label>
-					Volume
-					<input
-						type="range"
-						min={0}
-						max={1}
-						step={0.01}
-						bind:value={volumes[o]}
-						disabled={!active[o]}
-					/>
-				</label>
-
-				<label>
-					Waveform
-					<select bind:value={waveforms[o]} disabled={!active[o]}
-						>{#each oscillatorTypes as type}<option>{type}</option>{/each}
-					</select>
-				</label>
-
-				<label>
-					Follow
-					<input type="checkbox" bind:checked={follow[o]} disabled={!active[o]} />
-				</label>
-
-				<label>
-					Frequency
-					<input
-						type="range"
-						min={20}
-						max={2000}
-						step={0.1}
-						bind:value={frequencies[o]}
-						disabled={!active[o] || follow[o]}
-					/>
-				</label>
-
-				<label>
-					Detune
-					<input
-						type="range"
-						min={-50}
-						max={50}
-						step={0.1}
-						bind:value={detunes[o]}
-						disabled={!active[o]}
-					/>
-				</label>
-			{/each}
-		</section>
-	</main>
-</AudioContext>
+		{/each}
+	</section>
+</main>
 
 <svelte:window on:keydown={keydown} on:keyup={keyup} />
 

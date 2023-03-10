@@ -43,11 +43,25 @@
 		analyser.connect(audioCtx.destination);
 	}
 
-	onMount(() => {
-		document.addEventListener('click', init, { once: true });
+	// TODO: revisit event types, listeners on window, document, or body?
 
+	const types = ['click', 'pointerdown', 'keydown', 'keypress'];
+
+	const addListeners = () =>
+		types.forEach((type) => window.addEventListener(type, interaction, { once: true }));
+
+	const removeListeners = () =>
+		types.forEach((type) => window.removeEventListener(type, interaction));
+
+	function interaction() {
+		init();
+		removeListeners();
+	}
+
+	onMount(() => {
+		addListeners();
 		return () => {
-			document.removeEventListener('click', init);
+			removeListeners();
 			audioCtx?.removeEventListener('statechange', statechange);
 		};
 	});
