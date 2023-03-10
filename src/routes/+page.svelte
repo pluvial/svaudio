@@ -6,15 +6,18 @@
 
 	let volume = 1;
 
+	let filterFrequency = 2000;
+	let filterResonance = 1;
+
+	let frequency = 220;
+
 	let active = [true, true];
 	let waveforms: OscillatorType[] = ['sawtooth', 'sawtooth'];
 	let volumes = [1, 1];
+	let frequencies = [frequency, frequency];
+	let follow = [true, true];
 
-	let frequency = 330;
 	let detune = 1;
-
-	let filterFrequency = 2000;
-	let filterResonance = 1;
 
 	let triggerAttack: () => void;
 	let triggerRelease: () => void;
@@ -50,12 +53,16 @@
 			<BiquadFilter frequency={filterFrequency} Q={filterResonance}>
 				{#if active[0]}
 					<Gain gain={volumes[0]}>
-						<Oscillator {frequency} type={waveforms[0]} />
+						<Oscillator frequency={follow[0] ? frequency : frequencies[0]} type={waveforms[0]} />
 					</Gain>
 				{/if}
 				{#if active[1]}
 					<Gain gain={volumes[1]}>
-						<Oscillator {detune} {frequency} type={waveforms[1]} />
+						<Oscillator
+							{detune}
+							frequency={follow[1] ? frequency : frequencies[1]}
+							type={waveforms[1]}
+						/>
 					</Gain>
 				{/if}
 			</BiquadFilter>
@@ -73,21 +80,32 @@
 		</section>
 
 		<section>
-			<h2>Oscillator 1</h2>
+			<h2>Filter</h2>
+
+			<label>
+				Frequency
+				<input type="range" min={30} max={10000} step={0.1} bind:value={filterFrequency} />
+			</label>
+
+			<label>
+				Resonance
+				<input type="range" min={0} max={50} step={0.1} bind:value={filterResonance} />
+			</label>
+		</section>
+
+		<section>
+			<h2>Oscillators</h2>
+
+			<label>
+				Frequency
+				<input type="range" min={20} max={2000} step={0.1} bind:value={frequency} />
+			</label>
+
+			<h3>Oscillator 1</h3>
 
 			<label>
 				Active
 				<input type="checkbox" bind:checked={active[0]} />
-			</label>
-
-			<label>
-				Waveform
-				<select bind:value={waveforms[0]} disabled={!active[0]}
-					><option>sine</option>
-					<option>triangle</option>
-					<option>square</option>
-					<option>sawtooth</option>
-				</select>
 			</label>
 
 			<label>
@@ -103,17 +121,51 @@
 			</label>
 
 			<label>
+				Waveform
+				<select bind:value={waveforms[0]} disabled={!active[0]}
+					><option>sine</option>
+					<option>triangle</option>
+					<option>square</option>
+					<option>sawtooth</option>
+				</select>
+			</label>
+
+			<label>
+				Follow
+				<input type="checkbox" bind:checked={follow[0]} disabled={!active[0]} />
+			</label>
+
+			<label>
 				Frequency
-				<input type="range" min={20} max={1000} step={0.1} bind:value={frequency} />
+				<input
+					type="range"
+					min={20}
+					max={2000}
+					step={0.1}
+					bind:value={frequencies[0]}
+					disabled={!active[0] || follow[0]}
+				/>
 			</label>
 		</section>
 
 		<section>
-			<h2>Oscillator 2</h2>
+			<h3>Oscillator 2</h3>
 
 			<label>
 				Active
 				<input type="checkbox" bind:checked={active[1]} />
+			</label>
+
+			<label>
+				Volume
+				<input
+					type="range"
+					min={0}
+					max={1}
+					step={0.01}
+					bind:value={volumes[1]}
+					disabled={!active[1]}
+				/>
 			</label>
 
 			<label>
@@ -127,22 +179,32 @@
 			</label>
 
 			<label>
-				Detune
-				<input type="range" min={-50} max={50} step={0.1} bind:value={detune} />
+				Follow
+				<input type="checkbox" bind:checked={follow[1]} disabled={!active[1]} />
 			</label>
-		</section>
-
-		<section>
-			<h2>Filter</h2>
 
 			<label>
 				Frequency
-				<input type="range" min={30} max={10000} step={0.1} bind:value={filterFrequency} />
+				<input
+					type="range"
+					min={20}
+					max={2000}
+					step={0.1}
+					bind:value={frequencies[1]}
+					disabled={!active[1] || follow[1]}
+				/>
 			</label>
 
 			<label>
-				Resonance
-				<input type="range" min={0} max={50} step={0.1} bind:value={filterResonance} />
+				Detune
+				<input
+					type="range"
+					min={-50}
+					max={50}
+					step={0.1}
+					bind:value={detune}
+					disabled={!active[1]}
+				/>
 			</label>
 		</section>
 
@@ -168,15 +230,24 @@
 	}
 
 	h2 {
-		margin-top: 1em;
+		margin-top: 0.5em;
+		margin-bottom: 0.2em;
+	}
+
+	h3 {
+		margin-top: 0.5em;
 		margin-bottom: 0.2em;
 	}
 
 	label {
-		max-width: 20em;
+		max-width: 40em;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 0.5em;
+	}
+
+	input[type='range'] {
+		width: 40em;
 	}
 </style>
