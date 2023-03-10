@@ -20,6 +20,10 @@
 </script>
 
 <AudioContext on:error={({ detail: error }) => console.error(error)}>
+	<p slot="suspended">click to activate audio context</p>
+
+	<p slot="closed">audio context closed</p>
+
 	<Gain gain={volume}>
 		<Gain gain={0} bind:triggerAttackRelease>
 			<BiquadFilter frequency={filterFrequency} Q={filterResonance}>

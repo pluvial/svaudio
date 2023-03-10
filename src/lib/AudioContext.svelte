@@ -54,10 +54,9 @@
 </script>
 
 {#if $state === 'running'}
-	<p>running</p>
 	<slot {audioCtx} />
 {:else if $state === 'suspended'}
-	<p>click</p>
+	<slot name="suspended" />
 {:else if $state === 'closed'}
-	<p>closed</p>
+	<slot name="closed" />
 {/if}
