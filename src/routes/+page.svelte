@@ -1,8 +1,9 @@
 <script lang="ts">
 	import AudioContext from '$lib/AudioContext.svelte';
+	import BiquadFilter from '$lib/BiquadFilter.svelte';
+	import Envelope from '$lib/Envelope.svelte';
 	import Gain from '$lib/Gain.svelte';
 	import Oscillator from '$lib/Oscillator.svelte';
-	import BiquadFilter from '$lib/BiquadFilter.svelte';
 
 	let volume = 1;
 
@@ -62,7 +63,16 @@
 	<p slot="closed">audio context closed</p>
 
 	<Gain gain={volume}>
-		<Gain gain={0} bind:triggerAttack bind:triggerRelease bind:triggerAttackRelease>
+		<Gain gain={0}>
+			<Envelope
+				param="gain"
+				attack={0.01}
+				hold={0.2}
+				release={0.1}
+				bind:triggerAttack
+				bind:triggerRelease
+				bind:triggerAttackRelease
+			/>
 			<BiquadFilter frequency={filterFrequency} Q={filterResonance} type={filterType}>
 				{#each { length: 3 } as _, o}
 					{#if active[o]}
